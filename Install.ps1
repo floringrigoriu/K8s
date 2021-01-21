@@ -21,9 +21,16 @@ cd config/manager && kustomize edit set image controller=${IMG}
 kustomize build ..\default\ |kubectl apply -f -
 
 # Undeploy controller in the configured Kubernetes cluster in ~/.kube/config
-kustomize build config/default | kubectl delete -f -
+kustomize build ..\default | kubectl delete -f -
 
 # install verification 
 # CRD : 
 oc get crds | where {($_ -like "*uipath*" )}
+kubectl explain UiPathPortal --recursive=true
+
+# deployment verification
+oc project demo-service-fabric
+oc get uipathportals
+kubectl get uipathportals
+kubectl describe uipathportals uipathportal-sample
 

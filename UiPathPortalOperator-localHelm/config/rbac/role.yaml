@@ -78,5 +78,13 @@ rules:
   - patch
   - update
   - watch
-
+# ingress management permissions
+- apiGroups:
+  - ""
+  - "extensions"
+  resources:
+    - ingresses
+    - services 
+  verbs:
+  - '*'
 # +kubebuilder:scaffold:rules

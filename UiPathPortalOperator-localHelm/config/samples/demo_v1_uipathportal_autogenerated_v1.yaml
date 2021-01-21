@@ -1,0 +1,43 @@
+apiVersion: demo.com/v1
+kind: UiPathPortal
+metadata:
+  name: uipathportal-sample
+  namespace: demo-service-fabric
+spec:
+  # Default values copied from <project_dir>/helm-charts/portal/values.yaml
+  affinity: {}
+  appName: Portal
+  azureKeyVault:
+    clientId: 49e7d81d-04a5-4bf9-b96e-440aab60ed43
+    clientSecret: U.E2xdUQ1h-Se3Z05-_u-ns13u_bD_qDH-
+    url: https://localcd-openshift.vault.azure.net
+  env:
+    CLOUDRPA_VERSION: unknown-from-helm-values
+    DEPLOYMENT_TYPE: unknown-from-helm-values
+    IS_NEW_CLUSTER: "false"
+    NEW_RELIC_LICENSE_KEY: eu01xxdc9ba9b696da417d0db367ee673bfdNRAL
+  environment: nst
+  fullnameOverride: ""
+  hostname: ingress.local
+  hostname_trafficmanager: openshift.local
+  image:
+    pullPolicy: Always
+    repository: uipathcloudrpa.azurecr.io/portal
+    tag: latest
+  ingress:
+    annotations: {}
+    enabled: false
+    hosts:
+    - chart-example.local
+    paths: []
+    tls: []
+  nameOverride: ""
+  nodeSelector: {}
+  replicaCount: 1
+  resources: {}
+  service:
+    port: 80
+    type: ClusterIP
+  tolerations: []
+  
+  
