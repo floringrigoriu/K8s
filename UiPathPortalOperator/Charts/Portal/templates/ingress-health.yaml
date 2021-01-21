@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name:  {{ include "portal.fullname" . }}-ingress-health
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /shallow/healthStatus
+spec:
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      - path: /portal/shallow/healthStatus
+        backend:
+          serviceName:  {{ include "portal.fullname" . }}
+          servicePort: 8080
+  - host: {{ .Values.hostname_trafficmanager }}
+    http:
+      paths:
+      - path: /portal/shallow/healthStatus
+        backend:
+          serviceName:  {{ include "portal.fullname" . }}
+          servicePort: 8080

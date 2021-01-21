@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "identity-service.name" . }}-api
+  labels:
+    app.kubernetes.io/name: {{ include "identity-service.name" . }}-api
+    helm.sh/chart: {{ include "identity-service.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "identity-service.name" . }}-api
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "identity-service.name" . }}-api
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      hostAliases:
+        - ip: "{{ .Values.devhosts_alias }}"
+          hostnames :
+          - "{{ .Values.devhosts_alias_hostNames }}"
+      imagePullSecrets: 
+        - name: regcred
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}-api:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 80
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+          - name: ca-pemstore
+            mountPath: /usr/local/share/ca-certificates/ingress.local.crt
+            subPath: ingress.local.crt
+            readOnly: false
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "update-ca-certificates"]
+          env:
+            - name: AzureKeyVaultURL
+              value: '{{ .Values.azureKeyVault.url }}'
+            - name: AzureKeyVaultClientId
+              value: '{{ .Values.azureKeyVault.clientId }}'
+            - name: AzureKeyVaultClientSecret
+              value: '{{ .Values.azureKeyVault.clientSecret }}'
+            - name: appName
+              value: '{{ .Values.appName}}'
+            - name: stage
+              value: '{{ .Values.environment}}'
+            - name: region
+              value: '{{ .Values.region}}'
+            - name: CORECLR_ENABLE_PROFILING
+              value: '{{ .Values.CORECLR_ENABLE_PROFILING }}'
+            - name: CORECLR_NEWRELIC_HOME
+              value: '{{ .Values.CORECLR_NEWRELIC_HOME }}'
+            - name: CORECLR_PROFILER
+              value: '{{ .Values.CORECLR_PROFILER }}'
+            - name: CORECLR_PROFILER_PATH
+              value: '{{ .Values.CORECLR_PROFILER_PATH }}'
+            - name: NEW_RELIC_LICENSE_KEY
+              value: '{{ .Values.NEW_RELIC_LICENSE_KEY }}'
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name: ca-pemstore
+        configMap:
+          name: ca-pemstore
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

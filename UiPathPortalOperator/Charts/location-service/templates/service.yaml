@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "location-service.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "location-service.name" . }}
+    helm.sh/chart: {{ include "location-service.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "location-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

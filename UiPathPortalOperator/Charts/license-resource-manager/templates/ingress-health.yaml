@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name:  {{ include "license-resource-manager.fullname" . }}-ingress-health
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /health
+spec:
+  tls:
+  - secretName: ingress.local.tls
+    hosts:
+      - '*.local'
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      - path: /lrm/health
+        backend:
+          serviceName:  {{ include "license-resource-manager.fullname" . }}
+          servicePort: 80
+  - host: {{ .Values.hostname_trafficmanager }}
+    http:
+      paths:
+      - path: /lrm/health
+        backend:
+          serviceName:  {{ include "license-resource-manager.fullname" . }}
+          servicePort: 80
+

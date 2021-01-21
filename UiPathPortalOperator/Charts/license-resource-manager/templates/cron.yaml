@@ -1,0 +1,43 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-trialdowngrade-cron
+  namespace: {{ .Values.application_namespace }}
+spec:
+  schedule: "0 */24 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: curl
+              image: appropriate/curl
+              command:
+              - "/bin/sh"
+              - "-c"
+              - 'curl -X POST "http://{{ include "license-resource-manager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/api-internal/account-license/downgrade-to-community" -H "accept:*/*" -H "Content-Length: 0"'
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-refreshexpired-cron
+  namespace: {{ .Values.application_namespace }}
+spec:
+  schedule: "0 */24 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: curl
+              image: appropriate/curl
+              command:
+                - "/bin/sh"
+                - "-c"
+                - 'curl -X POST "http://{{ include "license-resource-manager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/api-internal/account-license/refresh-expired" -H "accept:*/*" -H "Content-Length: 0"'
+          restartPolicy: OnFailure

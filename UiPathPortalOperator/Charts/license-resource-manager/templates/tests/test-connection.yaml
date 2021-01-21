@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "license-resource-manager.fullname" . }}-test-connection"
+  labels:
+    app.kubernetes.io/name: {{ include "license-resource-manager.name" . }}
+    helm.sh/chart: {{ include "license-resource-manager.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args:  ['{{ include "license-resource-manager.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

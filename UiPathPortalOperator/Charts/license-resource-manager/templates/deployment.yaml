@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "license-resource-manager.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "license-resource-manager.name" . }}
+    helm.sh/chart: {{ include "license-resource-manager.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "license-resource-manager.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "license-resource-manager.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      hostAliases:
+        - ip: "{{ .Values.devhosts_alias }}"
+          hostnames :
+          - "{{ .Values.devhosts_alias_hostNames }}"
+      imagePullSecrets: 
+        - name: regcred
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+          - name: ca-pemstore
+            mountPath: /usr/local/share/ca-certificates/ingress.local.crt
+            subPath: ingress.local.crt
+            readOnly: false
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "update-ca-certificates"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            timeoutSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 30
+            periodSeconds: 20
+          env:
+            - name: AzureKeyVaultURL
+              value: '{{ .Values.azureKeyVault.url }}'
+            - name: AzureKeyVaultClientId
+              value: '{{ .Values.azureKeyVault.clientId }}'
+            - name: AzureKeyVaultClientSecret
+              value: '{{ .Values.azureKeyVault.clientSecret }}'
+            - name: CORECLR_ENABLE_PROFILING
+              value: '{{ .Values.CORECLR_ENABLE_PROFILING }}'
+            - name: CORECLR_NEWRELIC_HOME
+              value: '{{ .Values.CORECLR_NEWRELIC_HOME }}'
+            - name: CORECLR_PROFILER
+              value: '{{ .Values.CORECLR_PROFILER }}'
+            - name: CORECLR_PROFILER_PATH
+              value: '{{ .Values.CORECLR_PROFILER_PATH }}'
+            - name: NEW_RELIC_LICENSE_KEY
+              value: '{{ .Values.NEW_RELIC_LICENSE_KEY }}'
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name: ca-pemstore
+        configMap:
+          name: ca-pemstore
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

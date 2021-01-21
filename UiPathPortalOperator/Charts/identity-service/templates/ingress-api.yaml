@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "identity-service.name" . }}-api
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /identity_/$1
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    helm.sh/chart: {{ include "identity-service.chart" . }}
+    app.kubernetes.io/name: {{ include "identity-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffers: "8 256k"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+spec:
+  tls:
+  - secretName: ingress.local.tls
+    hosts:
+      - '*.local'
+  rules:
+    - host: {{ .Values.hostname }}
+      http:
+        paths:
+          - path: /identity_/?(.*)
+            backend:
+              serviceName: {{ include "identity-service.name" . }}-api
+              servicePort: 80
+    - host: {{ .Values.hostname_trafficmanager }}
+      http:
+        paths:
+          - path: /identity_/?(.*)
+            backend:
+              serviceName: {{ include "identity-service.name" . }}-api
+              servicePort: 80
