@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name:  {{ include "portal.fullname" . }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Xss-Protection: 1; mode=block";
+      more_set_headers "Content-Security-Policy: default-src 'none'; connect-src 'self' https://*.uipath.com https://dc.services.visualstudio.com/v2/track https://media.licdn.com https://app.launchdarkly.com/sdk; font-src 'self' 'unsafe-inline' https://media.licdn.com https://*.typekit.net/ https://fonts.gstatic.com; img-src 'self' https://media.licdn.com https://media-exp1.licdn.com https://*.wp.com https://s.gravatar.com https://secure.gravatar.com https://*.googleusercontent.com https://i.ytimg.com; script-src 'self' 'unsafe-inline' https://s.ytimg.com https://w.appzi.io https://www.youtube.com/iframe_api; style-src 'self' 'unsafe-inline' https://media.licdn.com https://*.typekit.net/ https://fonts.googleapis.com/; manifest-src 'self'; frame-src 'self' https://*.uipath.com https://*.azure-api.net https://www.youtube.com;";
+      more_set_headers "X-Content-Type-Options: nosniff";
+spec:
+  tls:
+  - secretName: ingress.local.tls
+    hosts:
+      - '*.local'
+  rules:
+  - host: {{ .Values.hostname }}
+    http:
+      paths:
+      - path: /?(.*)
+        backend:
+          serviceName:  {{ include "portal.fullname" . }}
+          servicePort: 80
+  - host: {{ .Values.hostname_trafficmanager }}
+    http:
+      paths:
+      - path: /?(.*)
+        backend:
+          serviceName:  {{ include "portal.fullname" . }}
+          servicePort: 80
+

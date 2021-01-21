@@ -1,0 +1,42 @@
+apiVersion: demo.com/v1
+kind: UiPathPortal
+metadata:
+  name: uipathportal-sample
+spec:
+  # Default values copied from <project_dir>/helm-charts/portal/values.yaml
+  affinity: {}
+  appName: unknown-from-helm-values
+  azureKeyVault:
+    clientId: unknown-from-helm-values
+    clientSecret: unknown-from-helm-values
+    url: unknown-from-helm-values
+  env:
+    CLOUDRPA_VERSION: unknown-from-helm-values
+    DEPLOYMENT_TYPE: unknown-from-helm-values
+    IS_NEW_CLUSTER: "false"
+    NEW_RELIC_LICENSE_KEY: eu01xxdc9ba9b696da417d0db367ee673bfdNRAL
+  environment: unknown-from-helm-values
+  fullnameOverride: ""
+  hostname: unknown-from-helm-values
+  hostname_trafficmanager: unknown-from-helm-values
+  image:
+    pullPolicy: Always
+    repository: uipathcloudrpa.azurecr.io/portal
+    tag: latest
+  ingress:
+    annotations: {}
+    enabled: false
+    hosts:
+    - chart-example.local
+    paths: []
+    tls: []
+  nameOverride: ""
+  nodeSelector: {}
+  replicaCount: 1
+  resources: {}
+  service:
+    port: 80
+    type: ClusterIP
+  tolerations: []
+  
+  

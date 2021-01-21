@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "portal.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "portal.name" . }}
+    helm.sh/chart: {{ include "portal.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "portal.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "portal.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      imagePullSecrets: 
+        - name: regcred
+      containers:
+        - name: {{ .Chart.Name }}
+          args: [ "--max-http-header-size" , "80000", "Build/server/main.server.js"]
+          command: ["node"] 
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /portal/shallow/healthStatus
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /portal/shallow/healthStatus
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 5
+            timeoutSeconds: 5
+          env:
+          - name: NODE_TLS_REJECT_UNAUTHORIZED
+            value: '0'
+          - name: NEW_RELIC_LICENSE_KEY
+            value: '{{ .Values.NEW_RELIC_LICENSE_KEY }}'
+          - name: ENVIRONMENT
+            value: '{{ .Values.environment }}'
+          - name: CLOUDRPA_VERSION
+            value: '{{ .Values.env.CLOUDRPA_VERSION }}'
+          - name: DEPLOYMENT_TYPE
+            value: '{{ .Values.env.DEPLOYMENT_TYPE }}'
+          - name: IS_NEW_CLUSTER
+            value: '{{ .Values.env.IS_NEW_CLUSTER }}'
+          - name: CLUSTER_TRAFFIC_MANAGER
+            value: '{{ .Values.hostname_trafficmanager }}'
+          - name: AZURE_KV_URL
+            value: '{{ .Values.azureKeyVault.url }}'
+          - name: AZURE_KV_CLIENT_ID
+            value: '{{ .Values.azureKeyVault.clientId }}'
+          - name: AZURE_KV_CLIENT_SECRET
+            value: '{{ .Values.azureKeyVault.clientSecret }}'
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,24 @@
+# permissions for end users to edit uipathportals.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uipathportal-editor-role
+rules:
+- apiGroups:
+  - demo.com
+  resources:
+  - uipathportals
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - demo.com
+  resources:
+  - uipathportals/status
+  verbs:
+  - get

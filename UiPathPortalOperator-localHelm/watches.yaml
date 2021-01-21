@@ -1,0 +1,6 @@
+# Use the 'create api' subcommand to add watches to this file.
+- group: demo.com
+  version: v1
+  kind: UiPathPortal
+  chart: helm-charts/portal
+# +kubebuilder:scaffold:watch

@@ -1,0 +1,8 @@
+domain: com
+layout: helm.sdk.operatorframework.io/v1
+projectName: uipathportaloperator-localhelm
+resources:
+- group: demo
+  kind: UiPathPortal
+  version: v1
+version: 3-alpha

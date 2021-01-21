@@ -1,0 +1,20 @@
+# permissions for end users to view uipathportals.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uipathportal-viewer-role
+rules:
+- apiGroups:
+  - demo.com
+  resources:
+  - uipathportals
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - demo.com
+  resources:
+  - uipathportals/status
+  verbs:
+  - get
