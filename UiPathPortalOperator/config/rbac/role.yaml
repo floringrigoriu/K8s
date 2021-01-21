@@ -28,4 +28,55 @@ rules:
   verbs:
   - create
 
+##
+## Rules for demo.my.domain/v1, Kind: UiPathPortal
+##
+- apiGroups:
+  - demo.my.domain
+  resources:
+  - uipathportals
+  - uipathportals/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - services/finalizers
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
 # +kubebuilder:scaffold:rules
