@@ -22,6 +22,8 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
+      imagePullSecrets: 
+      - name: regcred-v2
       containers:
       - image: controller:latest
         args:
